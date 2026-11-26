@@ -1,0 +1,50 @@
+##inside generic-variables.tf file at the end add this blocks copy from line 3 till 11
+  
+variable "environment" {
+  type = string
+  default = "dev"
+}
+
+variable "department" {
+  type = string
+  default = "sap"
+}
+
+###lets create a new file called as local.tf copy from line 14 till 23
+  locals {
+  resource_name_prefix = "${var.department}-${var.environment}"
+  #resource_name_prefix = sap-dev
+  project_tags = { #this project_tag is name
+    environment = var.environment 
+    department  = var.department
+    project     = "terraform"
+
+  }
+}
+###inside the resource.tf delete everything and add thsi block copy from line 25 till 29
+  resource "azurerm_resource_group" "my_rg" { #human defined refrence block
+  name     = "${local.resource_name_prefix}-${var.resource_group_name}"
+  location = var.location
+  tags     = local.project_tags
+}
+
+##delete vnet.tf content copy line 32 till 28
+  resource "azurerm_virtual_network" "vnet" {
+  name                = "${local.resource_name_prefix}-${var.vnet_name}"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+  address_space       = var.vnet_address_space
+  tags     = local.project_tags
+}
+
+##inside subnet.tf delete everything add this copy from line 41 till 46
+  resource "azurerm_subnet" "web_subnet" {
+  name                 = "${local.resource_name_prefix}-${var.subnet_name}"
+  resource_group_name  = azurerm_resource_group.my_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = var.subnet_address_prefixes
+}
+
+#do terraform plan 
+  #when you are planning check the resource name prefixes and tags in vnet and rg
+ # finally do terraform apply

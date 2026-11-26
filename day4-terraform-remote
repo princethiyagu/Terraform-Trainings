@@ -1,0 +1,24 @@
+#first we need to destroy the environment
+  terraform destroy --auto-approve
+  ###then delete some files
+  .terraform
+  terraform.tfstate
+  terraform.tfstate.backup
+
+  #then create a new file called as backend.tf inside that you need to copy from line 10 till 17
+
+terraform {
+  backend "azurerm" {
+    resource_group_name = "value" #in value put the storage account rg name
+    storage_account_name = "value" #in value replace it with storage account name
+    container_name = "tfstate" #replace it with the container we have created tfstate
+    key = "project.tfstate" #this is the name of the state file which will be created in the container
+  }
+}
+
+#after this do again 
+  terraform init
+  terraform plan
+  terraform apply 
+  ##once applied you will not see the state file in your local machine 
+  ##go to storage account inside container tfstate file is there you will see the project.tfstate

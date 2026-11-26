@@ -1,0 +1,6 @@
+#3you need to go to publicip.tf file at the starting put /*  and at the end put */
+  ###go to nic.tf file you will find   public_ip_address_id = azurerm_public_ip.web_vm_publicip[each.key].id at the starting just put //
+
+  ##after that do terraform destroy
+  terraform apply 
+  ###then check the vm in your resource group click on vm1 and vm2 there will be no public ip

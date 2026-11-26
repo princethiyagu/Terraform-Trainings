@@ -1,0 +1,51 @@
+##go vm.tf file delete everything and copy paste this from line 2 till 32
+  resource "azurerm_linux_virtual_machine" "web_vm" {
+  for_each            = var.linux_vms
+  name                = "${local.resource_name_prefix}-${each.key}-vm"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+  size                = each.value.vm_size
+  zone                = each.value.zone
+  admin_username      = "azureuser"
+  network_interface_ids = [
+    azurerm_network_interface.web_nic[each.key].id,
+  ]
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("${path.module}/ssh-keys/terraform-azure.pem.pub")
+    #it will look for file in the current directory
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "ubuntu-24_04-lts"
+    sku       = "server"
+    version   = "latest"
+  }
+  custom_data = filebase64("${path.module}/app.sh")
+}
+
+##go to instance-varaibles.tf file delete everything copy from line 35 till 51
+  variable "linux_vms" {
+  description = "linux vm configuration across az"
+  type = map(object({
+    vm_size = string
+    zone    = string
+  }))
+  default = {
+    "web1" = {
+      vm_size = "Standard_D2ads_v6"
+      zone    = "1"
+    }
+    "web2" = {
+      vm_size = "Standard_D2s_v6"
+      zone    = "2"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+#lets create a file called as publicip.tf copy from line 2 till 11
+resource "azurerm_public_ip" "web_vm_publicip" {
+  name                = "${local.resource_name_prefix}-publicip"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+  allocation_method   = "Static"
+  sku = "Standard" #basic it will create the public ip in single az standard it will spread across all the az in your region
+  tags = {
+    environment = "Production"
+  }
+}
+
+#lets create a nic card create a file nic.tf copy from line 14 till 29
+resource "azurerm_network_interface" "web_nic" {
+  name                = "${local.resource_name_prefix}-nic"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.web_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.web_vm_publicip.id
+  }
+}
+
+output "instance_publicip" {
+  value = azurerm_public_ip.web_vm_publicip.ip_address
+}
+
+#finally run terraform plan terraform apply
+##lets graph it terraform graph 
+##whatever output you get copy the same from starting till end and paste it inside this website
+https://dreampuf.github.io/GraphvizOnline/

@@ -1,0 +1,53 @@
+#create a file generic-varibles.tf copy from line 2 till 35 inside resource group change my name to your name
+  variable "resource_group_name" {
+  description = "this is the name of the rg"
+  type = string
+  default = "rg-kyn-gopal"
+}
+
+variable "location" {
+  description = "this is the location of the rg"
+  type = string
+  default = "eastus"
+}
+
+variable "vnet_name" {
+  description = "this is the name of the vnet"
+  type = string
+  default = "vnet-kyn"
+}
+
+variable "vnet_address_space" {
+  description = "this is the address space of the vnet"
+  type = list(string)
+  default = ["172.31.0.0/16"]
+}
+
+variable "subnet_name" {
+  description = "this is the name of the subnet"
+  type = string
+  default = "subnet-kyn"
+}
+variable "subnet_address_prefixes" {
+  description = "this is the address prefixes of the subnet"
+  type = list(string)
+  default = ["172.31.1.0/24"]
+}
+
+##go inside resource.tf file delete everything and copy paste this from line 38 till 41
+  resource "azurerm_resource_group" "my_rg" { #human defined refrence block
+  name     = var.resource_group_name
+  location = var.location
+}
+
+#####go inside vnet.tf file delete everything copy from line 44 till 49
+  resource "azurerm_virtual_network" "vnet" {
+  name                = var.vnet_name
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+  address_space       = var.vnet_address_space
+}
+
+###exercise on subnet inside genric-varailbes.tf file we have define subnet name and subnet address go to your subnet.tf file 
+  name = var.gethevaluefrom generic caraibles
+  address_prefix = var.gethevaluefrom generic caraibles

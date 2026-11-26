@@ -1,0 +1,23 @@
+#terraform workspace
+  37 terraform destroy --auto-approve                                                                                     
+  38 terraform workspace                                                                                                  
+  39 terraform workspace list 
+  #create a new dev env
+  40 terraform workspace new dev                                                                                          
+  41 terraform workspace list      
+  #this will create the dev environment
+  42 terraform apply --var-file=dev.tfvars --auto-approve                                                                 
+  43 terraform workspace list                                                                                             
+#move to default workspace                                                                             
+  45 terraform workspace select default                                                                                   
+  46 terraform workspace list                                                                                             
+#creating prod                                                                               
+  48 terraform workspace new prod                                                                                         
+  49 terraform apply --var-file=prod.tfvars --auto-approve  
+  #you need to go to resource group in azure you will see two resource group with dev and prod with your name
+  #inside dev env you will see single vm in prod you will see three vm
+  #finally destroy both the env
+  terraform workspace select dev
+  terraform destroy --var-file=dev.tfvars --auto-approve    
+    terraform workspace select prod
+  terraform destroy --var-file=prod.tfvars --auto-approve  

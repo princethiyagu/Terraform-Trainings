@@ -1,0 +1,13 @@
+##inside rdp you need to start powershell in admin mode and copy paste this whole link 
+  Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+  ##once installation complete close the powershell and start again in admin mode
+  choco install terraform
+  choco install git
+  choco install vscode
+  choco install azure-cli
+  ##again close the powershell
+  ##start again in normal mode
+  git version
+  terraform --version
+  az
+  ##visual studoi code will be in desktop

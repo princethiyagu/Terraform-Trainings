@@ -1,0 +1,32 @@
+#first do terraform destroy
+##inside vm.tf file at the starting put /*   and end of the line put */
+  #create a new file win.tf copy from line 4 till 26
+  resource "azurerm_windows_virtual_machine" "win_vm" {
+  name                = "example-machine"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  size                = "Standard_D4_v5"
+  admin_username      = "adminuser"
+  admin_password      = "P@$$w0rd1234!"
+  network_interface_ids = [
+    azurerm_network_interface.example.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2016-Datacenter"
+    version   = "latest"
+  }
+}
+
+#exercise
+  1. change the name of the vm
+  2. change the refrence of resource group and location as it is showing example
+  3. change the nic card refrence showing example
+  4. terraform apply go inside your resource group select the win machine download the rdp file and try to connect

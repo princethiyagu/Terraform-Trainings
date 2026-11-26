@@ -1,0 +1,62 @@
+#create a new file lb.tf copy from line 2 till 31
+  resource "azurerm_public_ip" "lb_publicip" {
+
+  name                = "${local.resource_name_prefix}-lb-publicip"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard" #basic it will create the public ip in single az standard it will spread across all the az in your region
+
+  tags = local.project_tags
+}
+#lets create the lb and attach the public ip
+resource "azurerm_lb" "web_lb" {
+  name                = "${local.resource_name_prefix}-lb"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+
+  frontend_ip_configuration {
+    name                 = "PublicIPAddress"
+    public_ip_address_id = azurerm_public_ip.lb_publicip.id
+  }
+}
+output "lb_publicip" {
+  value = azurerm_public_ip.lb_publicip.ip_address
+}
+
+#lets create the backend pool
+resource "azurerm_lb_backend_address_pool" "lb_backend_pool" {
+  loadbalancer_id = azurerm_lb.web_lb.id
+   name                = "${local.resource_name_prefix}-backendpool"
+}
+#inside lb.tf append this line at the end from 35 till 62
+
+#probe
+resource "azurerm_lb_probe" "lb_probe" {
+  loadbalancer_id     = azurerm_lb.web_lb.id
+  name                = "frontendprobe"
+  protocol            = "Tcp"
+  port                = 80
+  interval_in_seconds = 30
+  number_of_probes    = 2 #every 30 second lb will ping your vms 1 min if i dont get a response it will stop 
+}
+
+#lb rule
+resource "azurerm_lb_rule" "web_lb_rule" {
+  loadbalancer_id                = azurerm_lb.web_lb.id
+  name                           = "lb_rule"
+  protocol                       = "Tcp"
+  frontend_port                  = 80 #lb #443
+  backend_port                   = 80 #instance port tomcat 8080
+  frontend_ip_configuration_name = azurerm_lb.web_lb.frontend_ip_configuration[0].name
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.lb_backend_pool.id]
+  probe_id                       = azurerm_lb_probe.lb_probe.id
+}
+
+##finally attach all the instance nic card to backend pool
+resource "azurerm_network_interface_backend_address_pool_association" "lb_backend_pool_association" {
+  for_each                = var.linux_vms
+  network_interface_id    = azurerm_network_interface.web_nic[each.key].id
+  ip_configuration_name   = azurerm_network_interface.web_nic[each.key].ip_configuration[0].name
+  backend_address_pool_id = azurerm_lb_backend_address_pool.lb_backend_pool.id
+}

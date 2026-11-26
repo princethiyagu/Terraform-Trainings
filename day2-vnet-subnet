@@ -1,0 +1,21 @@
+##open visual studio inside rdp
+  ##click on the + icon create vnet.tf copy from line 3 till 8 change my name to your name 
+  resource "azurerm_virtual_network" "vnet" {
+  name                = "gopal-network"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+  address_space       = ["10.0.0.0/16"] 
+}
+
+###create a new file subnet.tf copy from line 11 till 16
+  resource "azurerm_subnet" "web_subnet" {
+  name                 = "web-subnet"
+  resource_group_name  = azurerm_resource_group.my_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+##then in the terminal copy paste those 4 env varaibles in the ppower shell
+  terraform plan you will see there is vnet and subnet are geeting added
+  terraform apply 
+  ##then go to azure portal click on resource group you will see inside your rg you have the vnet go inside vnet you will see the subnet also

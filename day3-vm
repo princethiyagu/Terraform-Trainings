@@ -1,0 +1,43 @@
+##create a new file vm.tf copy from line 2 till 30
+  resource "azurerm_linux_virtual_machine" "web_vm" {
+  name                = "${local.resource_name_prefix}-vm"
+  location            = azurerm_resource_group.my_rg.location #it get from the state file
+  resource_group_name = azurerm_resource_group.my_rg.name
+  size                = "Standard_F2"
+  admin_username      = "azureuser"
+  network_interface_ids = [
+    azurerm_network_interface.web_nic.id,
+  ]
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("${path.module}/ssh-keys/terraform-azure.pem.pub")
+    #it will look for file in the current directory
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+  custom_data = filebase64("${path.module}/app.sh")
+}
+###exercise
+###1. do terraform apply this will create the vm and you need to check the same inside your resource group if you click on the vm you will see the public and private ip coming from nic
+  ##2. run a command terraform graph copy the content paste it in https://dreampuf.github.io/GraphvizOnline/ you will see vm is attached to your nic card
+  3. copy the public ip paste it in the browser then wait for a min remove the https to http
+  4. lets login inside the vm change the public ip to your ip
+   24 cd .\ssh-keys\                                                                                                       
+  25 ssh -i .\terraform-azure.pem azureuser@40.117.129.148    
+  #once login 
+  curl localhost
+  ##you will see the same test page
+  exit
+  26 cd ..     
+  
